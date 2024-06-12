@@ -22,10 +22,16 @@ static void SIM7020_stop()
     delay(1500);
     digitalWrite(23, 1);
 }
+
+static void SIM7020_restart()
+{
+    SIM7020_stop();
+    delay(5000);
+    SIM7020_start();
+    delay(5000);
+}
 bool SIM7020_init()
 {
-    pinMode(23, OUTPUT);
-    digitalWrite(23, 1);
 
     SIM7020_start();
 
@@ -46,7 +52,7 @@ bool SIM7020_init()
                 else
                 {
                     Serial.println("Err in ST1_IDLE");
-                    return false;
+                    SIM7020_restart();
                 }
                 break;
             case 2:
@@ -57,8 +63,8 @@ bool SIM7020_init()
                 else
                 {
                     Serial.println("Err in ST3_IDLE");
-
-                    return false;
+                    state = 1;
+                    SIM7020_restart();
                 }
                 break;
             case 3:
@@ -68,12 +74,9 @@ bool SIM7020_init()
                 }
                 else
                 {
-                    Serial.println("SIM not found");
-                    delay(2000);
-                    SIM7020_stop();
-                    delay(5000);
-                    SIM7020_start();
                     state = 1;
+                    Serial.println("SIM not found");
+                    SIM7020_restart();
                 }
                 break;
             case 4:
@@ -85,7 +88,8 @@ bool SIM7020_init()
                 else
                 {
                     Serial.println("Err in ST4_IDLE");
-                    return false;
+                    state = 1;
+                    SIM7020_start();
                 }
             }
 
@@ -108,6 +112,12 @@ bool SIM7020_init()
                             state = 2;
                         }
                     }
+                    else
+                    {
+                        SIM7020_restart();
+                        state = 1;
+                        mode = IDLE_MODE;
+                    }
                 }
                 break;
             case 2:
@@ -118,7 +128,9 @@ bool SIM7020_init()
                 else
                 {
                     Serial.println("Err in ST2_REGIS");
-                    return false;
+                    SIM7020_restart();
+                    state = 1;
+                    mode = IDLE_MODE;
                 }
                 break;
             case 3:
@@ -129,7 +141,9 @@ bool SIM7020_init()
                 else
                 {
                     Serial.println("Err in ST3_REGIS");
-                    return false;
+                    SIM7020_restart();
+                    state = 1;
+                    mode = IDLE_MODE;
                 }
                 break;
             case 4:
@@ -141,7 +155,9 @@ bool SIM7020_init()
                 else
                 {
                     Serial.println("Err in ST4_REGIS");
-                    return false;
+                    SIM7020_restart();
+                    state = 1;
+                    mode = IDLE_MODE;
                 }
                 break;
             }
@@ -199,7 +215,7 @@ static std::string removeWhitespace(std::string input)
     for (char c : input)
     {
         if (!isspace(c))
-        { // Kiểm tra xem ký tự có phải là ký tự khoảng trắng không
+        {
             output.push_back(c);
         }
     }
@@ -217,7 +233,6 @@ static std::string hex_to_string(std::string input)
     {
         if (!isHexChar(input[i]) || !isHexChar(input[i + 1]))
         {
-            // Ký tự không hợp lệ, xử lý lỗi tại đây
             Serial.println("Invalid hex character detected!");
             return "";
         }
@@ -230,20 +245,18 @@ void SIM7020_http_get_tb(void)
 {
     std::string get_command = "AT+CHTTPSEND=0,0,\"/api/v1/" + DEVICE_TOKEN + "/attributes\"";
     std::string actual_resp = "";
-    if (sendCommand(get_command, "OK", 2000, 1, &actual_resp))
+    if (sendCommand(get_command, "OK", 3000, 1, &actual_resp))
     {
         Serial.println(actual_resp.c_str());
 
         size_t pos = actual_resp.find("+CHTTPNMIC:");
         if (pos != std::string::npos)
         {
-            // Extract the hexadecimal content after +CHTTPNMIC:
             std::string hexContent = actual_resp.substr(pos + strlen("+CHTTPNMIC:"));
 
             std::size_t pos1 = hexContent.find(",", hexContent.find(",", hexContent.find(",", hexContent.find(",") + 1) + 1) + 1);
             if (pos1 != std::string::npos)
             {
-                // Extract the hexadecimal content after the fourth comma
                 std::string newHexContent = hexContent.substr(pos1 + 1);
                 std::string jsonFormat = hex_to_string(newHexContent);
                 DeserializationError error = deserializeJson(doc1, jsonFormat);
@@ -261,14 +274,12 @@ void SIM7020_http_get_tb(void)
             }
             else
             {
-                // Fourth comma not found in the response
-                Serial.println("Error: Fourth comma not found in the response");
+                Serial.println("Data not found");
             }
         }
         else
         {
-            // +CHTTPNMIC not found in the response
-            Serial.println("Error: +CHTTPNMIC not found in the response");
+            Serial.println("Error: +CHTTPNMIC not found");
         }
     }
     else

@@ -10,28 +10,38 @@ float temp = 0;
 float humi = 0;
 bool valid_data = false;
 int currentTime = 0;
-bool y, x;
+bool sim_init_flag = false, http_init_flag = false;
 void setup()
 {
+  pinMode(23, OUTPUT);
+  pinMode(2, OUTPUT);
+  pinMode(19, OUTPUT);
+  digitalWrite(23, 1);
   uart_begin();
   lcd_init();
 
-  pinMode(2, OUTPUT);
-  pinMode(19, OUTPUT);
-
   dht11_init();
 
-  x = SIM7020_init();
-  if (x == true)
+  sim_init_flag = SIM7020_init();
+  if (sim_init_flag == false)
   {
-    Serial.println("true");
-    y = SIM7020_http_init();
-    digitalWrite(2, HIGH);
+    Serial.println("SIM init err");
+    while (sim_init_flag == false)
+    {
+      sim_init_flag = SIM7020_init();
+    }
   }
-  else
+
+  http_init_flag = SIM7020_http_init();
+  if (http_init_flag == false)
   {
-    Serial.println("false");
+    Serial.println("HTTP init err");
+    while (http_init_flag == false)
+    {
+      http_init_flag = SIM7020_http_init();
+    }
   }
+  digitalWrite(2, HIGH);
 }
 
 void loop()
@@ -40,7 +50,7 @@ void loop()
   if (millis() - currentTime >= TB_SEND_DATA_TIME)
   {
     currentTime = millis();
-    if (y == true && x == true)
+    if (http_init_flag == true && sim_init_flag == true)
     {
       std::string data_payload = prepare_data();
 

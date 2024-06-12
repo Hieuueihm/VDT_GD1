@@ -2,6 +2,8 @@
 
 LiquidCrystal_I2C lcd(LCD_ADDRESS, LCD_COLUMNS, LCD_ROWS);
 
+float prev_humi = 0, prev_temp = 0;
+int prev_led_state = -1;
 void lcd_init()
 {
     lcd.init();
@@ -17,14 +19,24 @@ void lcd_init()
 }
 void lcd_display_temp_humi(float temp, float humi)
 {
-
-    lcd.setCursor(2, 0);
-    lcd.print(temp);
-    lcd.setCursor(10, 0);
-    lcd.print(humi);
+    if (temp != prev_temp)
+    {
+        lcd.setCursor(2, 0);
+        lcd.print(temp);
+        prev_temp = temp;
+    }
+    if (humi != prev_humi)
+    {
+        lcd.setCursor(10, 0);
+        lcd.print(humi);
+    }
 }
 void lcd_display_led(int led_state)
 {
-    lcd.setCursor(5, 1);
-    lcd.print(led_state == HIGH ? "ON " : "OFF");
+    if (prev_led_state != led_state)
+    {
+        lcd.setCursor(5, 1);
+        lcd.print(led_state == HIGH ? "ON " : "OFF");
+        prev_led_state = led_state;
+    }
 }

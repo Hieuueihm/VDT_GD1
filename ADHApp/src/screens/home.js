@@ -141,6 +141,8 @@ export default function HomeScreen() {
         setWeather(data);
       });
       const data = await fetchAttributes();
+      setSlider(data.led_brightness);
+      setIsSwitchEn(data.led_state);
       setClientRespData(data);
     }
   };

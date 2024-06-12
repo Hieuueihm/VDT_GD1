@@ -4,7 +4,6 @@ HardwareSerial AT(1);
 void uart_begin()
 {
     Serial.begin(115200);
-
     Serial2.begin(115200);
 }
 void test()
@@ -36,7 +35,6 @@ bool sendCommand(std::string command, std ::string expected_response, uint32_t t
             {
                 char c = Serial2.read();
                 resp += c;
-                // Check if the response matches the expected response
                 if (resp.find(expected_response) != std::string::npos)
                 {
                     flag = true;
@@ -44,16 +42,17 @@ bool sendCommand(std::string command, std ::string expected_response, uint32_t t
             }
             else
             {
-                delay(200); // Reduce the delay to avoid excessive waiting
+                delay(200);
             }
         }
-        if(flag == true){
+
+        if (flag == true)
+        {
             if (actual_resp != nullptr)
             {
-                // Assign resp to actual_resp
                 *actual_resp = resp;
             }
-            return AT_RESP_OK; // Assuming AT_RESP_OK is equivalent to true
+            return AT_RESP_OK;
         }
     }
 
