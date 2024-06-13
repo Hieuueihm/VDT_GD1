@@ -8,7 +8,7 @@ export const fetchAttributes = async () => {
     const url = `${THINGSBOARD_HOST}/api/v1/${DEVICE_ACCESS_TOKEN}/attributes`;
     const response = await axios.get(url);
 
-    console.log('Attributes:', response.data.client);
+    console.log('Attributes:', response.data);
     return response.data.client;
   } catch (error) {
     console.error('Error fetching attributes:', error);

@@ -20,16 +20,17 @@ function App() {
           component={LoginScreen}
           options={{ headerShown: false }}
         />
+           <Stack.Screen
+          name={ROUTES.HOMESCREEN}
+          component={HomeScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name={ROUTES.WEATHERSCREEN}
           component={WeatherScreen}
           options={{ headerShown: false }}
         />
-        <Stack.Screen
-          name={ROUTES.HOMESCREEN}
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        />
+     
       </Stack.Navigator>
     </NavigationContainer>
   );

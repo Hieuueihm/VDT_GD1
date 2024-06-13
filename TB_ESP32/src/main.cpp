@@ -42,6 +42,7 @@ void setup()
     }
   }
   digitalWrite(2, HIGH);
+  std::string data_payload = prepare_data();
 }
 
 void loop()
@@ -54,7 +55,7 @@ void loop()
     {
       std::string data_payload = prepare_data();
 
-      bool z = SIM7020_http_send_tb(data_payload);
+      SIM7020_http_send_tb(data_payload);
     }
     else
     {

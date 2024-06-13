@@ -31,19 +31,21 @@ const LoginScreen = () => {
   const [password, setPassword] = useState("");
 
   const handleLoginBtn = async () => {
+    console.log(userName, password);
     // console.log(userName, password);
     if (!userName) {
       utils.Toast.showToast("error", "userName", "Please enter user name");
     } else if (!password) {
       utils.Toast.showToast("error", "password", "Please enter password!");
     } else {
-      // console.log(userName, password);
+      console.log(userName, password);
       await handleLogin({
         userName: userName,
         password: password,
       })
         .then((res) => {
           if (res.status === 200 && res.data.success === true) {
+            console.log("Login success");
             utils.AsyncStorage.storeItem(
               "userId",
               String(res.data.data.userId)
@@ -51,6 +53,7 @@ const LoginScreen = () => {
 
             navigation.navigate(ROUTES.HOMESCREEN);
           } else {
+            console.log("err username or password");
             utils.Toast.showToast(
               "error",
               "login",
@@ -59,9 +62,10 @@ const LoginScreen = () => {
           }
         })
         .catch((err) => {
-          utils.Toast.showToast("error", "server", "Error from server!");
           console.log(err);
+          utils.Toast.showToast("error", "server", "Error from server!");
         });
+        console.log("accp")
     }
     // navigation.navigate("HOME");
   };
