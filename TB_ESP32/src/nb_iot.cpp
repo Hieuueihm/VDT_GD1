@@ -245,7 +245,7 @@ void SIM7020_http_get_tb(void)
 {
     std::string get_command = "AT+CHTTPSEND=0,0,\"/api/v1/" + DEVICE_TOKEN + "/attributes\"";
     std::string actual_resp = "";
-    if (sendCommand(get_command, "OK", 3000, 1, &actual_resp))
+    if (sendCommand(get_command, "OK", 2000, 1, &actual_resp))
     {
         Serial.println(actual_resp.c_str());
 
@@ -284,6 +284,6 @@ void SIM7020_http_get_tb(void)
     }
     else
     {
-        Serial.println("get err");
+        Serial.println("");
     }
 }
